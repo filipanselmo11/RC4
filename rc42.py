@@ -1,67 +1,63 @@
 import codecs
+import os
 
-MOD = 256
+mod = 256
 
-def KSA(chave):
-    S = list(range(MOD))
+def ksa(chave):
+    S = list(range(mod))
     j = 0
     tamChave = len(chave)
-    for i in range(MOD): 
-        j = (j + S[i] + chave[i % tamChave]) % MOD
+    for i in range(mod):
+        j = (j + S[i] + chave[i % tamChave]) % mod
         S[i], S[j] = S[j], S[i]
     return S
 
 
-def PRGA(S):
+def prga(S):
     i = j = 0
     while(True):
-        i = (i + 1) % MOD
-        j = (j + S[i]) % MOD
+        i = (i + 1) % mod
+        j = (j + S[i]) % mod
         S[i], S[j] = S[j], S[i]
-        K = S[(S[i] + S[j]) % MOD]
+        K = S[(S[i] + S[j]) % mod]
         yield K
 
-    
-def RC4(chave):#RC4
-    S = KSA(chave)
-    return PRGA(S)
+def rc4(chave):
+    S = ksa(chave)
+    return prga(S)
 
-
-def encrypt_logic(chave, texto):
+def logica(chave, texto):
     chave = [ord(c) for c in chave]
-    chave_stream = RC4(chave)
+    chave_stream = rc4(chave)
     res = []
     for c in texto:
         val = ("%02X" % (c ^ next(chave_stream)))
         res.append(val)
     return ''.join(res)
 
-
-def encrypt(chave, textoPlano):
+def cifrar(chave, textoPlano):
     textoPlano = [ord(c) for c in textoPlano]
-    return encrypt_logic(chave, textoPlano)
+    return logica(chave, textoPlano)
 
-
-def decrypt(chave, textoCifrado):
+def decifrar(chave, textoCifrado):
     textoCifrado = codecs.decode(textoCifrado, 'hex_codec')
-    res = encrypt_logic(chave, textoCifrado)
+    res = logica(chave, textoCifrado)
     return codecs.decode(res, 'hex_codec')
-
 
 def main():
     while(True):
-         #print("Usuário 1")
-         chave = input('Informe sua chave: ')
-         mensagem = input('Informe a mensagem: ')
-         print('Mensagem: ', mensagem)
-         print("Mensagem Enviada \n")
-         #print("Usuario 2")
-         print("Mensagem Recebida")
-         cifrar = encrypt(chave, mensagem)
-         print("Mensagem cifrada: ", cifrar)
-         decifrar = decrypt(chave, cifrar)
-         print("Mensagem decifrada: ", decifrar)
-         print("\n")
+        #print("Usuário 1")
+        chave = os.urandom(16)
+        mensagem = input('Informe a mensagem: ')
+        print('Mensagem: ', mensagem)
+        print("Mensagem Enviada \n")
+        #print("Usuario 2")
+        print("Mensagem Recebida")
+        cfr = cifrar(chave, mensagem)
+        print("Mensagem cifrada: ", cfr)
+        dfr = decifrar(chave, cifrar)
+        print("Mensagem decifrada: ", dfr)
+        print("\n")
 
 
 if __name__ == '__main__':
