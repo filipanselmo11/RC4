@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Chat App</title>
+    </head>
+    <body>
+        <h3 style="color: #ccc;font-size: 30px;">Sem mensagem ainda..</h3>
+        <div class="message_holder"></div>
+
+        <form action="" method="POST">
+            <input type="text" class="username" placeholder="Nome Usuario"/>
+            <input type="text" class="message" placeholder="Messages"/>
+            <input type="submit"/>
+        </form>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+        <script type="text/javascript">
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+            socket.on('connect', function() {
+                socket.emit('meu evento', {
+                    data: 'Usuario conectado'
+                })
+                var form = $('form').on('submit', function(e){
+                    e.preventDefault()
+                    let nome_usuario = $('input.nomeusuario').val()
+                    let usuario_input = $('input.message').val()
+                    socket.emit('meu evento', {
+                        nome_usuario: nome_usuario,
+                        message: usuario_input
+                    })
+                    $('input.message').val('').focus()
+                })
+            })
+
+            socket.on('minha resposta', function(msg){
+                console.log(msg)
+                if(typeof msg.nome_usuario !== 'undefined'){
+                    $('h3').remove()
+                    $('div.message.holder').append('<div><b style="color: #000">' +msg.nome_usuario+'</b> '+msg.message+'</div>')
+                }
+            })
+        </script>
+    </body>
+</html>
